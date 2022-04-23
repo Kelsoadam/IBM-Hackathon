@@ -26,12 +26,14 @@ Here is a very basic example of a UI that performs this functionality. This has 
 #### INFO
 The Back-End Example App uses AbuseIPDB as an example on how to use these web APIs in your back-end.
 
-AbuseIPDB
-Cisco Umbrella
-You can find more data sources on GitHub.
+[AbuseIPDB](https://www.abuseipdb.com/)
 
-Things to Think About
-Secret management - How do I store the API keys in a secure way?
-CORS - Cross Origin Resource Sharing. By default browsers will not allow a website to access resources on a different website. This is a problem when we are calling third party APIs. This is handled for you in the back-end example app.
-Data normalization - How do I compile all these data sources to a single format?
-Calling Web APIs - What library can I use to simplify calling Web APIs?
+[Cisco Umbrella](http://s3-us-west-1.amazonaws.com/umbrella-static/index.html)
+
+You can find more data sources on [GitHub](https://github.com/hslatman/awesome-threat-intelligence).
+
+##### Things to Think About
+- Secret management - How do I store the API keys in a secure way?
+- CORS - Cross Origin Resource Sharing. By default browsers will not allow a website to access resources on a different website. This is a problem when we are calling third party APIs. This is handled for you in the back-end example app.
+- Data normalization - How do I compile all these data sources to a single format?
+- Calling Web APIs - What library can I use to simplify calling Web APIs?
