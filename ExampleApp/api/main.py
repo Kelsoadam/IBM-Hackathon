@@ -1,13 +1,11 @@
 import os
+import dns.resolver
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import requests
 
 app = FastAPI()
-
-# Run the GUI
-os.system('node {path}'.format(path=os.getcwd() + "../gui/index.js"))
 
 # This is so we can access this API from our front-end
 # react application. This code will ensure we have a CORS
@@ -65,12 +63,10 @@ async def latitude(ip: str):
     )
     return data.content
 
-@app.get("/abuse/{ip}/org")
-async def org(ip: str):
-    org = requests.get(
-       "https://ipapi.co/{ip}/org".format(ip=ip)
-    )
-    data = requests.get(
-        "https://google.com/{org}".format(org=org)
-    )
-    return data.content
+@app.get("/domain/{domain}")
+async def domain(domain: str):
+    result = dns.resolver.query(domain, 'A')
+    s = ''
+    for res in result:
+        s = str(res)
+    return s

@@ -62,7 +62,7 @@
         <div id="main-body">
             <div id="search-content">
                 <p id="error"></p>
-                <h4 style="margin-bottom: 10px;">Input an IP Address</h4>
+                <h4 style="margin-bottom: 10px;">Input an IP Address or Domain</h4>
                 <input type="text" placeholder="IP Address" id="ip">
                 <input type="button" value="Lookup" onclick="checkIP();">
             </div>
@@ -70,12 +70,12 @@
             <div id="response" style="display: none;">
                 <h3><u>IP Address Data Feedback</u></h3>
                 <ul>
-                    <!--<li>IP Address: <p id="ip"></p></li>-->
+                    <li id="addr"></li><br/>
                     <li id="public"></li><br/>
                     <li id="version"></li><br/>
-                    <li id="domain"></li><br/>
+                    <li id="domain"></li><br/><br/>
                     <li id="country"></li><br/>
-                    <li id="location"></li><br/>
+                    <li id="location"></li><br/><br/>
                     <li id="isp"></li><br/>
                     <li id="abusescore"></li><br/>
                     <li id="usage"></li>
@@ -94,103 +94,116 @@
         <script defer src="https://unpkg.com/axios/dist/axios.min.js"></script>
         <script defer>
             async function checkIP() {
-                const ip = document.getElementById("ip").value;
-                axios.get(`http://localhost:8000/abuse/${ip}`)
+                let ip = document.getElementById("ip").value;
+                if (/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/gi.test(ip)) {
+                    _ipLookup(ip);
+                } else {
+                    axios.get(`http://localhost:8000/domain/${ip}`)
                     .then(data => {
-                        document.getElementById("response").style.display = "block";
-                        const response = JSON.parse(data.data).data;
-                        document.getElementById("country").innerHTML = `<b>Country:</b> ${response.countryCode || "Unknown"}`;
-                        document.getElementById("public").innerHTML = `<b>Public IP:</b> ${response.isPublic ? "Yes" : "No"}`;
-                        //document.getElementById("ip").innerText = ip;
-                        document.getElementById("isp").innerHTML = `<b>ISP:</b> ${response.isp}`;
-                        document.getElementById("usage").innerHTML = `<b>Usage:</b> ${response.usageType}`;
-                        document.getElementById("abusescore").innerHTML = `<b>Abuse Score:</b> ${response.abuseConfidenceScore}`;
-                        document.getElementById("domain").innerHTML = response.domain ? `<b>Domain:</b> <a href='https://${response.domain}' target="_blank">${response.domain}</a>` : `<b>Domain:</b> Unknown`;
-                        document.getElementById("version").innerHTML = `<b>IP Version:</b> IPv${response.ipVersion}`;
-
-                        document.getElementById("last-searched").innerHTML = `<b>Last Searched:</b> ${new Date().toLocaleString("en-GB")}`;
-
-                        const location = {latitude: null, longitude: null};
-                        const lat = new XMLHttpRequest();
-                        const long = new XMLHttpRequest();
-
-                        lat.addEventListener("load", function() {
-                            location.latitude = this.response;
-                            long.addEventListener("load", function() {
-                                location.longitude = this.response;
-                                document.getElementById("location").innerHTML = `<b>Latitude:</b> ${location.latitude.split('"').join("") == "Undefined" ? "Unknown" : location.latitude.split('"').join("")}</li><br/><li><b>Longitude:</b> ${location.longitude.split('"').join("") == "Undefined" ? "Unknown" : location.longitude.split('"').join("")}`;
-                                
-                                document.getElementById("map").innerHTML = "";
-                                if (location.latitude.split('"').join("") == "Undefined" || location.longitude.split('"').join("") == "Undefined")
-                                    return;
-                                const map = new ol.Map({
-                                    target: 'map',
-                                    layers: [
-                                        new ol.layer.Tile({
-                                            source: new ol.source.OSM()
-                                        }),
-                                        new ol.layer.Vector({
-                                            source: new ol.source.Vector({
-                                                features: [
-                                                    new ol.Feature({
-                                                        geometry: new ol.geom.Point(ol.proj.fromLonLat([
-                                                            parseFloat(location.longitude.split('"').join("")), 
-                                                            parseFloat(location.latitude.split('"').join(""))
-                                                        ]))
-                                                    })
-                                                ]
-                                            })
-                                        })
-                                    ],
-                                    view: new ol.View({
-                                        center: ol.proj.fromLonLat([
-                                            parseFloat(location.longitude.split('"').join("")), 
-                                            parseFloat(location.latitude.split('"').join(""))
-                                        ]),
-                                        zoom: 15
-                                    })
-                                });
-                                let container = document.getElementById('popup');
-                                if (!container) {
-                                    container = document.createElement("div");
-                                    container.id = "popup";
-                                    container.classList.add("ol-popup");
-                                    document.getElementById("response").append(container);
-                                }
-                                let content = document.getElementById('popup-content');
-                                if (!content) {
-                                    content = document.createElement("div");
-                                    content.id = "popup-content";
-                                    container.append(content);
-                                }
-                                const overlay = new ol.Overlay({
-                                    element: container,
-                                    autoPan: true,
-                                    autoPanAnimation: {
-                                        duration: 250
-                                    }
-                                });
-                                map.addOverlay(overlay);
-
-                                content.innerHTML = `<b>${response.domain}</b><br/>${[
-                                    location.longitude.split('"').join(""), 
-                                    location.latitude.split('"').join("")
-                                ].map(e => parseFloat(e).toFixed(2)).join(", ")}`;
-                                overlay.setPosition(ol.proj.fromLonLat([
-                                    parseFloat(location.longitude.split('"').join("")), 
-                                    parseFloat(location.latitude.split('"').join(""))
-                                ]));
-                            });
-                            long.open("GET", `http://localhost:8000/abuse/${ip}/longitude`);
-                            long.send();
-                        });
-                        lat.open("GET", `http://localhost:8000/abuse/${ip}/latitude`);
-                        lat.send();
+                        _ipLookup(data.data);
                     })
                     .catch(err => {
-                       document.getElementById("error").value = err.message;
+                        document.getElementById("error").value = err.message;
                     });
                 }
+            }
+            function _ipLookup(ip) {
+                axios.get(`http://localhost:8000/abuse/${ip}`)
+                .then(data => {
+                    document.getElementById("response").style.display = "block";
+                    const response = JSON.parse(data.data).data;
+                    document.getElementById("addr").innerHTML = `<b>IP Address:</b> ${ip}`;
+                    document.getElementById("country").innerHTML = `<b>Country:</b> ${response.countryCode || "Unknown"}`;
+                    document.getElementById("public").innerHTML = `<b>Public IP:</b> ${response.isPublic ? "Yes" : "No"}`;
+                    document.getElementById("isp").innerHTML = `<b>ISP:</b> ${response.isp}`;
+                    document.getElementById("usage").innerHTML = `<b>Usage:</b> ${response.usageType}`;
+                    document.getElementById("abusescore").innerHTML = `<b>Abuse Score:</b> ${response.abuseConfidenceScore}/100`;
+                    document.getElementById("domain").innerHTML = response.domain ? `<b>Domain:</b> <a href='https://${response.domain}' target="_blank">${response.domain}</a>` : `<b>Domain:</b> Unknown`;
+                    document.getElementById("version").innerHTML = `<b>IP Version:</b> IPv${response.ipVersion}`;
+
+                    document.getElementById("last-searched").innerHTML = `<b>Last Searched:</b> ${new Date().toLocaleString("en-GB")}`;
+
+                    const location = {latitude: null, longitude: null};
+                    const lat = new XMLHttpRequest();
+                    const long = new XMLHttpRequest();
+
+                    lat.addEventListener("load", function() {
+                        location.latitude = this.response;
+                        long.addEventListener("load", function() {
+                            location.longitude = this.response;
+                            document.getElementById("location").innerHTML = `<b>Latitude:</b> ${location.latitude.split('"').join("") == "Undefined" ? "Unknown" : location.latitude.split('"').join("")}</li><br/><li><b>Longitude:</b> ${location.longitude.split('"').join("") == "Undefined" ? "Unknown" : location.longitude.split('"').join("")}`;
+                            
+                            document.getElementById("map").innerHTML = "";
+                            if (location.latitude.split('"').join("") == "Undefined" || location.longitude.split('"').join("") == "Undefined")
+                                return;
+                            const map = new ol.Map({
+                                target: 'map',
+                                layers: [
+                                    new ol.layer.Tile({
+                                        source: new ol.source.OSM()
+                                    }),
+                                    new ol.layer.Vector({
+                                        source: new ol.source.Vector({
+                                            features: [
+                                                new ol.Feature({
+                                                    geometry: new ol.geom.Point(ol.proj.fromLonLat([
+                                                        parseFloat(location.longitude.split('"').join("")), 
+                                                        parseFloat(location.latitude.split('"').join(""))
+                                                    ]))
+                                                })
+                                            ]
+                                        })
+                                    })
+                                ],
+                                view: new ol.View({
+                                    center: ol.proj.fromLonLat([
+                                        parseFloat(location.longitude.split('"').join("")), 
+                                        parseFloat(location.latitude.split('"').join(""))
+                                    ]),
+                                    zoom: 15
+                                })
+                            });
+                            let container = document.getElementById('popup');
+                            if (!container) {
+                                container = document.createElement("div");
+                                container.id = "popup";
+                                container.classList.add("ol-popup");
+                                document.getElementById("response").append(container);
+                            }
+                            let content = document.getElementById('popup-content');
+                            if (!content) {
+                                content = document.createElement("div");
+                                content.id = "popup-content";
+                                container.append(content);
+                            }
+                            const overlay = new ol.Overlay({
+                                element: container,
+                                autoPan: true,
+                                autoPanAnimation: {
+                                    duration: 250
+                                }
+                            });
+                            map.addOverlay(overlay);
+
+                            content.innerHTML = `<b>${response.domain}</b><br/>${[
+                                location.longitude.split('"').join(""), 
+                                location.latitude.split('"').join("")
+                            ].map(e => parseFloat(e).toFixed(2)).join(", ")}`;
+                            overlay.setPosition(ol.proj.fromLonLat([
+                                parseFloat(location.longitude.split('"').join("")), 
+                                parseFloat(location.latitude.split('"').join(""))
+                            ]));
+                        });
+                        long.open("GET", `http://localhost:8000/abuse/${ip}/longitude`);
+                        long.send();
+                    });
+                    lat.open("GET", `http://localhost:8000/abuse/${ip}/latitude`);
+                    lat.send();
+                })
+                .catch(err => {
+                    document.getElementById("error").value = err.message;
+                });
+            }
         </script>
     </body>
 </html>
