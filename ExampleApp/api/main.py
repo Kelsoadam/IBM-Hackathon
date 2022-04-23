@@ -42,8 +42,32 @@ async def root():
 @app.get("/abuse/{ip}")
 async def abuse(ip: str):
     data = requests.get(
-        "https://api.abuseipdb.com/api/v2/check",
+       "https://api.abuseipdb.com/api/v2/check",
         params={"ipAddress": ip},
         headers={"Key": ABUSEIPDB_API_KEY, "Accept": "application/json"}
+    )
+    return data.content
+
+@app.get("/abuse/{ip}/latitude")
+async def latitude(ip: str):
+    data = requests.get(
+       "https://ipapi.co/{ip}/latitude".format(ip=ip)
+    )
+    return data.content
+
+@app.get("/abuse/{ip}/longitude")
+async def latitude(ip: str):
+    data = requests.get(
+       "https://ipapi.co/{ip}/longitude".format(ip=ip)
+    )
+    return data.content
+
+@app.get("/abuse/{ip}/org")
+async def org(ip: str):
+    org = requests.get(
+       "https://ipapi.co/{ip}/org".format(ip=ip)
+    )
+    data = requests.get(
+        "https://google.com/{org}".format(org=org)
     )
     return data.content
