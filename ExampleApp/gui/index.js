@@ -20,10 +20,6 @@ app.get("/", (req, res) => {
     res.sendFile(`${__dirname}/index.html`);
 });
 
-app.get("/temp", (req, res) => {
-    res.sendFile(`${__dirname}/temp.html`);
-});
-
 app.all("*", (req, res) => {
     res.status(404).send("404 Not Found");
 });
