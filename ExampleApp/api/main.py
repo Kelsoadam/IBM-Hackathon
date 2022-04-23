@@ -6,6 +6,9 @@ import requests
 
 app = FastAPI()
 
+# Run the GUI
+os.system('node {path}'.format(path=os.getcwd() + "../gui/index.js"))
+
 # This is so we can access this API from our front-end
 # react application. This code will ensure we have a CORS
 # header in every response for the allowed origins.

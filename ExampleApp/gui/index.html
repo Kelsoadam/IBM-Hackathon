@@ -6,6 +6,7 @@
         <style>
             ul {
                 list-style: none;
+                padding-left: 0%;
             }
             li {
                 display: inline-block;
@@ -28,25 +29,46 @@
                 left: -50px;
                 min-width: 100px;
             }
-            #search-content {
+            #search-content, #response {
+                text-align: center;
+            }
+            input[type="text"] {
+                text-align: center;
+            }
+            #header {
+                background-color: #006699;
+                width: 100%;
+                display: flex;
+            }
+            #main-body {
+                background-color: hsl(0, 0%, 78%);
+                font-family: Georgia, 'Times New Roman', Times, serif;
+            }
+            div {
+                padding: 0%;
+                border: 0px;
+                margin: 0%;
                 text-align: center;
             }
         </style>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.14.1/css/ol.css" type="text/css">
     </head>
 
-    <body>
-        <div>
+    <body style="background-color: hsl(0, 0%, 78%); margin: 0%; border: 0px; height: 100%; ">
+        <div id="header">
+            <a href="https://ibm.com" target="_blank"><img src="../../Assets/ibm-logo.png" alt="IBM Logo" style="height: 80px; width: 160px; margin-left: 25px; padding-top: 20px;"></a>
+            <h1 style="color: white; background-color: #006699; margin: 0%; height: 100px; font-size: 60px; font-family: fantasy; margin-left: 24%; padding-top: 20px;">IP Address Lookup</h1>
+        </div>
+        <div id="main-body">
             <div id="search-content">
                 <p id="error"></p>
-                <h1>Input an IP Address</h1>
-                <input type="text" placeholder="IP Address" id="ip"><br/>
+                <h4 style="margin-bottom: 10px;">Input an IP Address</h4>
+                <input type="text" placeholder="IP Address" id="ip">
                 <input type="button" value="Lookup" onclick="checkIP();">
             </div>
             <br/>
-            <br/>
             <div id="response" style="display: none;">
-                <h2>IP Address Data Feedback</h2>
+                <h3><u>IP Address Data Feedback</u></h3>
                 <ul>
                     <!--<li>IP Address: <p id="ip"></p></li>-->
                     <li id="public"></li><br/>
@@ -58,6 +80,7 @@
                     <li id="abusescore"></li><br/>
                     <li id="usage"></li>
                 </ul>
+                <p id="last-searched"></p>
                 <br/>
                 <div id="map" class="map"></div>
                 <div id="popup" class="ol-popup">
@@ -84,6 +107,8 @@
                         document.getElementById("abusescore").innerHTML = `<b>Abuse Score:</b> ${response.abuseConfidenceScore}`;
                         document.getElementById("domain").innerHTML = response.domain ? `<b>Domain:</b> <a href='https://${response.domain}' target="_blank">${response.domain}</a>` : `<b>Domain:</b> Unknown`;
                         document.getElementById("version").innerHTML = `<b>IP Version:</b> IPv${response.ipVersion}`;
+
+                        document.getElementById("last-searched").innerHTML = `<b>Last Searched:</b> ${new Date().toLocaleString("en-GB")}`;
 
                         const location = {latitude: null, longitude: null};
                         const lat = new XMLHttpRequest();

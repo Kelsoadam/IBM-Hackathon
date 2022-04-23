@@ -7,6 +7,10 @@ app.use(express.urlencoded({ extended: true }));
 
 app.set("x-powered-by", false);
 app.set("trust proxy", true);
+app.set("case sensitive routing", false);
+app.set("strict routing", false);
+
+app.use("/Assets", express.static(`Assets`));
 
 app.listen(3000, "0.0.0.0", () => {
     console.log("Listening on 0.0.0.0:3000");
